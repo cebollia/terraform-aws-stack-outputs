@@ -13,7 +13,7 @@
  *
  * **Note**: If you need to quote any values as part of your Outputs, where the output value could be mistaken for YAML
  * syntax, you must use single quotes.
- *
+ **/
 
 locals {
 
