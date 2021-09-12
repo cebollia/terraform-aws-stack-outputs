@@ -14,26 +14,10 @@
  * **Note**: If you need to quote any values as part of your Outputs, where the output value could be mistaken for YAML
  * syntax, you must use single quotes.
  *
- * ### Usage
- *
- *      module cfn_outputs {
- *        source = "{source}"
- *
- *        outputs = {
- *          foo = "bar"
- *          baz = "buux"
- *        }
- *      }
- */
-
-terraform {
-  required_version = "~> 0.12"
-}
 
 locals {
-  // This is a little gross, but allows us to pass in snake_case or kebab-case keys
-  // and convert them to CamelCase, since Cloudformation does not allow hyphens or underscores.
-  outputs = { for k, v in var.outputs : replace(title(replace(k, "/[\\-_]/", " ")), " ", "") => { Value = (v) } }
+
+  outputs = var.outputs
 
   // yamlencode wraps everything in quotes, which Cloudformation does not like, so we remove the quotes.
   cfn_template = replace(yamlencode({
