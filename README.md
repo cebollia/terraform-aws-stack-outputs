@@ -1,23 +1,39 @@
 # Cloudformation Stack Outputs
 
-This module creates a Cloudformation Stack solely for the purpose of allowing Stack Outputs and cross Cloudformation references. This is particularly useful when combining both Cloudformation (say, from Serverless Framework) and Terraform in the same project.
-
-See this helpful blog post: https://theburningmonk.com/2019/03/making-terraform-and-serverless-framework-work-together/
+Creates a Cloudformation stack solely to use the Output or Export function for Terraform values. This allows
+use to use Terraform for the bulk of your infrastructure, but use Cloudformation stacks for legacy inputs or
+Serverless stacks. From the Cloudformation stack, you can use the !ImportValue function to retreive the necessary
+value.
 
 Since Cloudformation does not allow creating a stack with out atleast a single resource - to get around  
 this, we create a custom `NullResource` in the Stack that uses a falsey condition, effectively creating a no-op.
 
-**Note**: Since Cloudformation does not allow any non-alphanumeric characters in the names of the Outputs, this module will force `snake_case` and `kebab-case` into `CamelCase`.
+This will not sanatize input, and fail if an unsupported character is passed in.
 
-**Note**: If you need to quote any values as part of your Outputs, where the output value could be mistaken for YAML syntax, you must use single quotes.
+### Terraform Usage
 
-### Usage
+```
+module "stack-outputs" {
 
-     module cfn_outputs {  
-       source = "{source}"
+  source = "github.com/cebollia/terraform-aws-stack-outputs"
 
-       outputs = {  
-         foo = "bar"  
-         baz = "buux"  
-       }  
-     }
+  name = "cloudformation-stack-name"
+  outputs = {
+    myVpcId = { 
+      Value = aws_vpc.main.id
+      Description = "Main AWS VPC"
+      Export = {
+        Name = "vpc:main:id"
+      }
+    }
+    myVpcArn = {
+      Value = aws_vpc.main.arn
+      Description = "Main VPC ARN"
+      Export = {
+        Name = "vpc:main:arn"
+      }
+    }
+  }
+
+}
+```
